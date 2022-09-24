@@ -50,7 +50,7 @@ function convertMonth(a) {
 
 const margin = {
     top: 20,
-    right: 0, 
+    right: 10, 
     bottom: 30,
     left: 60
 }
@@ -68,9 +68,18 @@ const y = d3.scaleBand()
 // x-axis
 const x = d3.scaleBand()
             .domain(gcag.map(d => Number(d["Date"].match(regexYear))))
-            .range([margin.left, width])
+            .range([margin.left, width - margin.right])
 
 // console.log(y.bandwidth())
+const cold = ["#25316D", "#277BC0", "#89CFFD", "#C1EFFF"]
+const neutral = ["#EEEEEE"]
+const hot = ["#FAF4B7", "#F2D388", "#FFAE6D", "#FD841F", "#E14D2A", "#D2001A", "#820000"]
+const tempValue = [-0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4];
+const heatColor = [cold[0], cold[1], cold[2], cold[3], neutral[0], hot[0], hot[1], hot[2], hot[3], hot[4], hot[5], hot[6]];
+
+const color = d3.scaleOrdinal()
+                .domain(tempValue)
+                .range(heatColor)
 
 // chart
 const svg = d3.select("#chart")
@@ -84,7 +93,7 @@ svg.append("g")
     .selectAll("rect")
     .data(gcag)
     .join("rect")
-        .attr("fill", d => {if (d["Mean"] > 1) {return "red"}; if (d["Mean"] < 1) {return "steelblue"}; if (d["Mean"] > 0.75 && d["Mean"] < 0.9 ) {return "green"}})
+        .attr("fill", d => color(d["Mean"]))
         .attr("width", x.bandwidth())
         .attr("height", y.bandwidth())
         .attr("x", d => x(Number(d["Date"].match(regexYear))))
@@ -94,7 +103,8 @@ svg.append("g")
 svg.append("g")
     .attr("transform", `translate(0, ${height - margin.bottom})`)
     .attr("font-weight", "bold")
-    .call(d3.axisBottom(x))
+    .call(d3.axisBottom(x)
+    .tickFormat(d => {if (d % 10 === 0) {return d}}))
 
 // y-axis scale
 svg.append("g")

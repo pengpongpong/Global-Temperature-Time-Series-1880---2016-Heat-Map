@@ -1,0 +1,15 @@
+html {
+    font-family: sans-serif;
+    width: 100vw;
+    height: 100vh;
+}
+
+body {
+    background: linear-gradient(45deg, #F2D388, #F5EDDC 70%)
+}
+
+h3 {
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+}
