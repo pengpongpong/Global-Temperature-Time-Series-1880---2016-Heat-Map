@@ -60,13 +60,13 @@ const tooltip = d3.select("#chart")
                 .style("position", "absolute")
                 .style("box-shadow", "0 0 4px 2px #d3d3d3")
 
-
+// tooltip events
 const mouseover = function(e) {
     tooltip
         .style("opacity", 1)
     d3.select(this)
         .style("stroke", "black")
-        .style("cursor", "pointer")
+        .style("cursor", "crosshair")
 }
 
 const mousemove = function(e) {
@@ -82,11 +82,12 @@ const mousemove = function(e) {
 
 const mouseleave = function(e) {
     tooltip
-        .style("opactiy", 0)
+        .style("opacity", 0)
     d3.select(this)
         .style("stroke", "none")
 }
 
+// margin
 const margin = {
     top: 20,
     right: 10, 
