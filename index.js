@@ -1,52 +1,16 @@
-import { data } from "./data.js";
+import { datas } from "./data.js";
 // import * as d3 from "d3";
 
 // filter data
-const gcag = data.filter(a => {if (a["Source"] === "GCAG") {return a}});
-// const gistemp = data.filter(a => {if (a["Source"] === "GISTEMP") {return a}});
+// GCAG data
+const data = datas.filter(a => {if (a["Source"] === "GCAG") {return a}});
 
-// console.log(typeof(gcag[1]["Mean"]))
+// GISTEMP data
+// const data = datas.filter(a => {if (a["Source"] === "GISTEMP") {return a}});
 
-const min = -0.78;
-const max = 1.35;
-
-// console.log(gistemp)
-// let date = data[23]["Date"]
-
-const regexMonth = /(?<=-)\d+(?=-)/
-const regexYear = /\d{4}(?=-)/
-
-// const resultYear = Number(date.match(regexYear))
-// const resultMonth = Number(date.match(regexMonth))
-
-// console.log(typeof(resultMonth))
-// console.log(typeof(resultYear))
-// console.log(resultYear)
-
-// let test = Number(data[23]["Date"].match(regexYear))
-
-// console.log(test)
-
-function convertMonth(a) {
-    let month;
-    if (a === 1) {month = "January"};
-    if (a === 2) {month = "February"};
-    if (a === 3) {month = "March"};
-    if (a === 4) {month = "April"};
-    if (a === 5) {month = "Mai"};
-    if (a === 6) {month = "June"};
-    if (a === 7) {month = "July"};
-    if (a === 8) {month = "August"};
-    if (a === 9) {month = "September"};
-    if (a === 10) {month = "October"};
-    if (a === 11) {month = "November"};
-    if (a === 12) {month = "December"}
-
-    return month;
-}
-
-// console.log(resultMonth)
-// console.log(convertMonth(resultMonth))
+const convertMonth = d3.scaleOrdinal()
+                    .domain([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+                    .range(["January", "February", "March", "April", "Mai", "June", "July", "August", "September", "October", "November", "December"].reverse())
 
 // custom tooltip
 const tooltip = d3.select("#chart")
@@ -76,8 +40,8 @@ const mousemove = function(e) {
             ${(e.toElement.__data__["Mean"])}°C`
             
         )
-        .style("left", `${e.offsetX + 40}px`)
-        .style("top", `${e.offsetY - 7}px`)
+        .style("left", `${e.pageX + 15}px`)
+        .style("top", `${e.pageY}px`)
 }
 
 const mouseleave = function(e) {
@@ -103,11 +67,14 @@ const height = 600;
 
 // y-axis
 const y = d3.scaleBand()
-            .domain(gcag.map(d => convertMonth(Number(d["Date"].match(regexMonth)))))
+            .domain(data.map(d => convertMonth(d["Date"])))
             .range([height - margin.bottom, margin.top])
+
+// filter year
+const regexYear = /\d{4}(?=-)/
 // x-axis
 const x = d3.scaleBand()
-            .domain(gcag.map(d => Number(d["Date"].match(regexYear))))
+            .domain(data.map(d => Number(d["Date"].match(regexYear))))
             .range([margin.left, width - margin.right])
 
 // heatmap colors
@@ -127,7 +94,6 @@ const colorScale = d3.scaleLinear()
                     .domain([d3.min(tempValue, d => d), d3.max(tempValue, d => d)])
                     .range([margin.left, width - 510])
 
-
 // chart
 const svg = d3.select("#chart")
                 .append("svg")
@@ -137,13 +103,13 @@ const svg = d3.select("#chart")
 
 svg.append("g")
     .selectAll("rect")
-    .data(gcag)
+    .data(data)
     .join("rect")
         .attr("fill", d => color(d["Mean"]))
         .attr("width", x.bandwidth())
         .attr("height", y.bandwidth())
         .attr("x", d => x(Number(d["Date"].match(regexYear))))
-        .attr("y", d => y(convertMonth(Number(d["Date"].match(regexMonth)))))
+        .attr("y", d => y(convertMonth(d["Date"])))
         .on("mouseover", mouseover)
         .on("mousemove", mousemove)
         .on("mouseleave", mouseleave)
@@ -153,7 +119,7 @@ svg.append("g")
     .attr("transform", `translate(0, ${height - margin.bottom})`)
     .attr("font-weight", "bold")
     .call(d3.axisBottom(x)
-    .tickFormat(d => {if (d % 10 === 0) {return d}}))
+    .tickFormat(d => {if (d % 10 === 0) {return d}})) //show every 10 year on scale
 
 // y-axis scale
 svg.append("g")
